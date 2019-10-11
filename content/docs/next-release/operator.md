@@ -109,6 +109,33 @@ NAME                                 DESIRED   CURRENT   READY     UP-TO-DATE   
 agent-as-daemonset-agent-daemonset   1         1         1         1            1
 ```
 
+## Configuring the Operator
+
+The Jaeger operator should work out of the box without additional tinkering, but if you have to you can configure it by saving and editing the deployment YAML file (`https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml`) before applying it to your Kubernetes or OpenShift cluster. To do this, edit the existing environment variable definitions or add your own from the list below (be careful, some variables use underscores, some use hyphens):
+
+- **WATCH_NAMESPACE**: which namespace to monitor for definitions of Jaeger resources. By default it's not set and the operator will be watching all namespaces
+- **OPERATOR_NAME**: set it to different values when running multiple instances of the Jaeger operator
+- **ES-PROVISION**: Whether to auto-provision an Elasticsearch cluster for suitable Jaeger instances. Possible values: 'yes', 'no', 'auto'. When set to 'auto' and the API name 'logging.openshift.io' is available, auto-provisioning is enabled. (default "auto")
+- **LOG-LEVEL**: The log-level for the operator. Possible values: trace, debug, info, warning, error, fatal, panic (default "info")
+- **METRICS-HOST**: The host to bind the metrics port (default "0.0.0.0")
+- **METRICS-PORT**: The metrics port (default 8383)
+- **CR-METRICS-PORT**: The metrics port for Operator and/or Custom Resource based metrics (default 8686)
+- **PLATFORM**: The target platform the operator will run. Possible values: 'kubernetes', 'openshift', 'auto-detect' (default "auto-detect")
+
+
+The following environment variables are necessary if your cluster cannot access the default registry (you should also edit the line that says `image:` in the same deployment file, or Kubernetes/OpenShift won't be able to start the operator at all)
+
+- **JAEGER-AGENT-IMAGE**: The Docker image for the Jaeger Agent (default "jaegertracing/jaeger-agent")
+- **JAEGER-ALL-IN-ONE-IMAGE**: The Docker image for the Jaeger all-in-one (default "jaegertracing/all-in-one")
+- **JAEGER-CASSANDRA-SCHEMA-IMAGE**: The Docker image for the Jaeger Cassandra Schema (default "jaegertracing/jaeger-cassandra-schema")
+- **JAEGER-COLLECTOR-IMAGE**: The Docker image for the Jaeger Collector (default "jaegertracing/jaeger-collector")
+- **JAEGER-ES-INDEX-CLEANER-IMAGE**: The Docker image for the Jaeger Elasticsearch Index Cleaner (default "jaegertracing/jaeger-es-index-cleaner")
+- **JAEGER-ES-ROLLOVER-IMAGE**: The Docker image for the Jaeger Elasticsearch Rollover (default "jaegertracing/jaeger-es-rollover")
+- **JAEGER-INGESTER-IMAGE**: The Docker image for the Jaeger Ingester (default "jaegertracing/jaeger-ingester")
+- **JAEGER-QUERY-IMAGE**: The Docker image for the Jaeger Query (default "jaegertracing/jaeger-query")
+- **JAEGER-SPARK-DEPENDENCIES-IMAGE**: The Docker image for the Spark Dependencies Job (default "jaegertracing/spark-dependencies")
+- **OPENSHIFT-OAUTH-PROXY-IMAGE**: The Docker image location definition for the OpenShift OAuth Proxy (default "openshift/oauth-proxy:latest")
+
 # Quick Start - Deploying the AllInOne image
 
 The simplest possible way to create a Jaeger instance is by creating a YAML file like the following example.  This will install the default AllInOne strategy, which deploys the "all-in-one" image (agent, collector, query, ingestor, Jaeger UI) in a single pod, using in-memory storage by default.
